@@ -1,5 +1,5 @@
 import cv2
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import time
 import numpy
 import torch
@@ -27,43 +27,26 @@ def test():
         os.makedirs(animation_dir)
 
     while True:
-        # location of arrow
-        left = 1815
-        top = 118
-        size = 32
-
-        # Capture minimap
         img = ImageGrab.grab()
 
         arrow_bbox = (1819, 74, 1819 + 32, 74 + 32)
-        arrow_img = img.crop(box = arrow_bbox)
+        arrow_img = img.crop(box=arrow_bbox)
 
         tensor_image = transform(arrow_img)
         x, y = model(torch.stack([tensor_image])).detach().numpy()[0]
         predicted_angle = numpy.arctan2(y, x)
 
-        # Upscale image a bit for better visuals
-        # img = numpy.array(img)
-        # img = img[:, :, ::-1].copy()
-        # new_size = 128
-        # img = cv2.resize(img, (new_size, new_size),
-        #                 interpolation=cv2.INTER_LINEAR)
-
-        # Draw the predicted angle
-
         radius = 16
         dx = radius * numpy.cos(predicted_angle)
         dy = radius * numpy.sin(predicted_angle)
 
-
-        
         minimap_bbox = (1760, 21, 1760 + 144, 21 + 144)
-        minimap_img = img.crop(box = minimap_bbox)
+        minimap_img = img.crop(box=minimap_bbox)
         minimap_img = numpy.array(minimap_img)
         minimap_img = minimap_img[:, :, ::-1].copy()
         pt1 = (int(144/2)+2, int(144/2)-3)
-        pt2 = (int(144/2 +2 + dx),
-               int(144/2 -3 + (-dy)))
+        pt2 = (int(144/2 + 2 + dx),
+               int(144/2 - 3 + (-dy)))
         minimap_img_with_pred_angle = cv2.line(
             minimap_img,
             pt1=pt1,
@@ -73,7 +56,8 @@ def test():
 
         cv2.imshow("test", minimap_img_with_pred_angle)
         if animation and (time.time_ns() - animation_last_time) > 1_000_000_000/animation_fps:
-            cv2.imwrite(animation_dir / f"{animation_frame}.png", minimap_img_with_pred_angle)
+            cv2.imwrite(animation_dir /
+                        f"{animation_frame}.png", minimap_img_with_pred_angle)
             animation_last_time = time.time_ns()
             animation_frame += 1
 
@@ -88,6 +72,28 @@ def test():
             break
 
 
+def create_image_grid():
+    rows = 10
+    cols = 10
+    imgs = []
+    img_dir = Path(__file__).parent / "dataset" / "images"
+    for file_name in os.listdir(img_dir):
+        imgs.append(Image.open(img_dir / file_name))
+        if len(imgs) == rows * cols:
+            break
+
+    assert len(imgs) == rows*cols
+
+    w, h = imgs[0].size
+    grid = Image.new('RGB', size=(cols*w, rows*h))
+    grid_w, grid_h = grid.size
+
+    for i, img in enumerate(imgs):
+        grid.paste(img, box=(i % cols*w, i//cols*h))
+
+    grid.show()
+
+
 def compile_animation():
     images = []
     file_names = os.listdir(animation_dir)
@@ -99,5 +105,6 @@ def compile_animation():
 
 
 if __name__ == "__main__":
-    #test()
-    compile_animation()
+    # test()
+    create_image_grid()
+    # compile_animation()

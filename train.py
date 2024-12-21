@@ -1,14 +1,12 @@
 import torch
 import torch.nn as nn
-from torchvision import datasets, transforms
-from torchvision.transforms import v2
+from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset
 from pathlib import Path
 from random import random, shuffle
 from PIL import Image
 import time
 import os
-import pandas as pd
 
 
 class MinimapArrowDataset(Dataset):
@@ -31,7 +29,7 @@ class MinimapArrowDataset(Dataset):
         y = torch.sin(facing).mul(radius)
         x = torch.cos(facing).mul(radius)
 
-        # Horizontal flip 
+        # Horizontal flip
         if self.train and random() < 0.25:
             img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             x = x.mul(-1)
@@ -95,7 +93,7 @@ def get_network():
         nn.Dropout(0.1),
 
         nn.Linear(64, 2),
-        #nn.Tanh()
+        # nn.Tanh()
     )
 
 

@@ -82,17 +82,17 @@ def get_network():
 
         nn.Flatten(),
 
-        nn.Linear(128, 128),
+        nn.Linear(128, 256),
         nn.ReLU(),
 
         nn.Dropout(0.2),
 
-        nn.Linear(128, 64),
+        nn.Linear(256, 128),
         nn.ReLU(),
 
         nn.Dropout(0.1),
 
-        nn.Linear(64, 2),
+        nn.Linear(128, 2),
         # nn.Tanh()
     )
 
@@ -102,7 +102,7 @@ def train():
 
     device = "cuda"
     num_epochs = 20000
-    batch_size = 64
+    batch_size = 128
     output_dir = Path(__file__).parent / f"train_{TS}"
     os.makedirs(output_dir, exist_ok=True)
     dataset_dir = Path(__file__).parent / "dataset"

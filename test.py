@@ -105,6 +105,6 @@ def compile_animation():
 
 
 if __name__ == "__main__":
-    # test()
-    create_image_grid()
+    test()
+    # create_image_grid()
     # compile_animation()
